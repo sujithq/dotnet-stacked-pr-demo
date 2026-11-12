@@ -4,3 +4,28 @@ GET {{Bookshelf.Api_HostAddress}}/api/health
 Accept: application/json
 
 ###
+
+GET {{Bookshelf.Api_HostAddress}}/api/books
+Accept: application/json
+
+###
+
+POST {{Bookshelf.Api_HostAddress}}/api/books
+Content-Type: application/json
+Accept: application/json
+
+{
+  "title": "The Hobbit",
+  "author": "J. R. R. Tolkien",
+  "isbn": "9780261102217",
+  "publishedYear": 1937
+}
+
+###
+
+# Replace with the ID from the POST response, or follow its Location header.
+@bookId = 00000000-0000-0000-0000-000000000000
+GET {{Bookshelf.Api_HostAddress}}/api/books/{{bookId}}
+Accept: application/json
+
+###

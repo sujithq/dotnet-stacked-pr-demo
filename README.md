@@ -44,6 +44,31 @@ dotnet run --project src/Bookshelf.Api
 
 Then call `GET http://localhost:5268/api/health`, or use `src/Bookshelf.Api/Bookshelf.Api.http`.
 
+## Books API (layer 2)
+
+| Endpoint | Response |
+| --- | --- |
+| `GET /api/books` | `200` with all books (initially `[]`) |
+| `GET /api/books/{id}` | `200` with a book, or `404` for an unknown ID |
+| `POST /api/books` | `201` with the created book and a `Location` header pointing to its GET endpoint |
+
+Create a book with this JSON body:
+
+```json
+{
+  "title": "The Hobbit",
+  "author": "J. R. R. Tolkien",
+  "isbn": "9780261102217",
+  "publishedYear": 1937
+}
+```
+
+Books have an `id`, `title`, `author`, normalized `isbn` and `publishedYear`. The catalog service
+requires a nonblank title and author, a valid ISBN-13 and a year from 1450 through the current UTC
+year. Invalid input returns `400` with field-specific validation errors; a duplicate ISBN returns
+`409` with problem details. Data is shared across requests but held only in memory and lost on
+restart. Title/author search is deferred to layer 3.
+
 ## CI
 
 [`ci.yml`](.github/workflows/ci.yml) restores, builds and tests the solution on every push to `main`
