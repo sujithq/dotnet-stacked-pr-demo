@@ -10,6 +10,11 @@ Accept: application/json
 
 ###
 
+GET {{Bookshelf.Api_HostAddress}}/api/books?query=tolkien
+Accept: application/json
+
+###
+
 POST {{Bookshelf.Api_HostAddress}}/api/books
 Content-Type: application/json
 Accept: application/json

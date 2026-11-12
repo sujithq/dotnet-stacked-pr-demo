@@ -5,7 +5,19 @@ namespace Bookshelf.Api.Services;
 
 public sealed class BookCatalogService(IBookRepository repository, TimeProvider timeProvider) : IBookCatalogService
 {
-    public IReadOnlyList<Book> GetAll() => repository.GetAll();
+    public IReadOnlyList<Book> GetAll(string? query = null)
+    {
+        var books = repository.GetAll();
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return books;
+        }
+
+        var search = query.Trim();
+        return books.Where(book =>
+            book.Title.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+            book.Author.Contains(search, StringComparison.OrdinalIgnoreCase)).ToArray();
+    }
 
     public Book? GetById(Guid id) => repository.GetById(id);
 

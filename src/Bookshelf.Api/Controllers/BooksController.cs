@@ -10,7 +10,7 @@ public sealed class BooksController(IBookCatalogService catalog) : ControllerBas
 {
     [HttpGet]
     [ProducesResponseType<IReadOnlyList<Book>>(StatusCodes.Status200OK)]
-    public ActionResult<IReadOnlyList<Book>> GetAll() => Ok(catalog.GetAll());
+    public ActionResult<IReadOnlyList<Book>> GetAll([FromQuery] string? query = null) => Ok(catalog.GetAll(query));
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType<Book>(StatusCodes.Status200OK)]
