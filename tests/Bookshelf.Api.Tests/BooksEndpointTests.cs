@@ -105,5 +105,40 @@ public sealed class BooksEndpointTests : IDisposable
         Assert.Single(Assert.IsType<Book[]>(await client.GetFromJsonAsync<Book[]>("/api/books")));
     }
 
+    [Theory]
+    [InlineData("  hObBiT  ", "The Hobbit")]
+    [InlineData("  mARTIN  ", "Clean Code")]
+    [InlineData("unknown", null)]
+    [InlineData("", "*")]
+    [InlineData("  ", "*")]
+    public async Task List_Query_FiltersByTitleOrAuthor(string query, string? expectedTitle)
+    {
+        using var client = factory.CreateClient();
+        using var first = await client.PostAsJsonAsync("/api/books", ValidBook);
+        using var second = await client.PostAsJsonAsync("/api/books",
+            new CreateBookRequest("Clean Code", "Robert Martin", "9780132350884", 2008));
+        Assert.Equal(HttpStatusCode.Created, first.StatusCode);
+        Assert.Equal(HttpStatusCode.Created, second.StatusCode);
+
+        using var response = await client.GetAsync($"/api/books?query={Uri.EscapeDataString(query)}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var books = Assert.IsType<Book[]>(await response.Content.ReadFromJsonAsync<Book[]>());
+        if (expectedTitle == "*")
+        {
+            Assert.Equal(2, books.Length);
+            Assert.Contains(books, book => book.Title == "The Hobbit");
+            Assert.Contains(books, book => book.Title == "Clean Code");
+        }
+        else if (expectedTitle is null)
+        {
+            Assert.Empty(books);
+        }
+        else
+        {
+            Assert.Equal(expectedTitle, Assert.Single(books).Title);
+        }
+    }
+
     public void Dispose() => factory.Dispose();
 }

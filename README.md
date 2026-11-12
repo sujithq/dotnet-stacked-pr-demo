@@ -18,7 +18,7 @@ main
 | --- | --- | --- |
 | 1. Catalog domain | `Book` model, in-memory repository and `IBookCatalogService` with validation rules, plus unit tests | `main` |
 | 2. Books API | `BooksController` (`GET /api/books`, `GET /api/books/{id}`, `POST /api/books`) and DI wiring, plus integration tests | Layer 1 |
-| 3. Book search | `GET /api/books?query=` filtering by title or author, plus tests | Layer 2 |
+| 3. Book search | `GET /api/books?query=` case-insensitive filtering by title or author, plus tests | Layer 2 |
 
 ## Try the stack
 
@@ -44,11 +44,12 @@ dotnet run --project src/Bookshelf.Api
 
 Then call `GET http://localhost:5268/api/health`, or use `src/Bookshelf.Api/Bookshelf.Api.http`.
 
-## Books API (layer 2)
+## Books API (layers 2–3)
 
 | Endpoint | Response |
 | --- | --- |
 | `GET /api/books` | `200` with all books (initially `[]`) |
+| `GET /api/books?query=<text>` | `200` with books whose title or author contains the query, or `[]` if none match |
 | `GET /api/books/{id}` | `200` with a book, or `404` for an unknown ID |
 | `POST /api/books` | `201` with the created book and a `Location` header pointing to its GET endpoint |
 
@@ -67,7 +68,8 @@ Books have an `id`, `title`, `author`, normalized `isbn` and `publishedYear`. Th
 requires a nonblank title and author, a valid ISBN-13 and a year from 1450 through the current UTC
 year. Invalid input returns `400` with field-specific validation errors; a duplicate ISBN returns
 `409` with problem details. Data is shared across requests but held only in memory and lost on
-restart. Title/author search is deferred to layer 3.
+restart. Search trims the query and matches title or author case-insensitively; a missing, empty or
+whitespace-only query returns all books.
 
 ## CI
 

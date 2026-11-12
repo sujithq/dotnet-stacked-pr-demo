@@ -97,6 +97,39 @@ public sealed class BookCatalogServiceTests
         Assert.Null(service.GetById(Guid.NewGuid()));
     }
 
+    [Theory]
+    [InlineData("Hobbit")]
+    [InlineData("Tolkien")]
+    [InlineData("  hObBiT  ")]
+    [InlineData("  tOLKIEN  ")]
+    public void GetAll_MatchingQuery_ReturnsOnlyMatchingBook(string query)
+    {
+        var expected = Assert.IsType<Book>(service.Add(ValidBook).Book);
+        Assert.IsType<Book>(service.Add(new CreateBookRequest("Clean Code", "Robert Martin", "9780132350884", 2008)).Book);
+
+        Assert.Equal(expected, Assert.Single(service.GetAll(query)));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    public void GetAll_BlankQuery_ReturnsAllBooks(string? query)
+    {
+        var first = Assert.IsType<Book>(service.Add(ValidBook).Book);
+        var second = Assert.IsType<Book>(service.Add(new CreateBookRequest("Clean Code", "Robert Martin", "9780132350884", 2008)).Book);
+
+        Assert.Equal(new[] { first, second }, service.GetAll(query));
+    }
+
+    [Fact]
+    public void GetAll_UnmatchedQuery_ReturnsEmpty()
+    {
+        service.Add(ValidBook);
+
+        Assert.Empty(service.GetAll("not present"));
+    }
+
     [Fact]
     public void Add_ConcurrentDuplicateIsbns_OnlyOneSucceeds()
     {
